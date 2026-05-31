@@ -9,7 +9,7 @@ resources:
 images:
   - name: senthilapi
     newName: ghcr.io/s3nthilg0pal/senthil-api
-    newTag: eb39510dc222956770e33182345c1297c2ee0ded
+    newTag: 3e24e3bcc556958b379ae309307b0c1ba87abf61
 
 patches:
   - target:
