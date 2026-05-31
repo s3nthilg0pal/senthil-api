@@ -7,7 +7,7 @@ resources:
   - ../../base
 
 images:
-  - name: senthilapi
+  - name: ghcr.io/s3nthilg0pal/senthil-api
     newName: ghcr.io/s3nthilg0pal/senthil-api
     newTag: 3e24e3bcc556958b379ae309307b0c1ba87abf61
 
