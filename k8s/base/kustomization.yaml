@@ -4,6 +4,6 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - configmap.yaml
-  - secret.yaml
-  - deployment.yaml
   - sealedsecret.yaml
+  - deployment.yaml
+  - service.yaml
