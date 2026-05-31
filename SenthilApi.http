@@ -1,0 +1,6 @@
+@SenthilApi_HostAddress = http://localhost:5045
+
+GET {{SenthilApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

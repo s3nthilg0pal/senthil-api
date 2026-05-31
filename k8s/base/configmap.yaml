@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: senthilapi-config
+  namespace: senthilapi
+data:
+  ASPNETCORE_ENVIRONMENT: Production
+  ASPNETCORE_URLS: http://+:8080
+  AI__Ollama__Endpoint: http://ollama:11434
+  AI__Ollama__ModelId: qwen3.5:2b
