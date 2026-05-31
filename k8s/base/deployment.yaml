@@ -28,7 +28,7 @@ spec:
             - configMapRef:
                 name: senthilapi-config
             - secretRef:
-                name: senthilapi-secrets
+                name: senthilapi-secret
           readinessProbe:
             httpGet:
               path: /healthz
