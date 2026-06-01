@@ -20,7 +20,7 @@ spec:
       containers:
         - name: senthilapi
           image: ghcr.io/s3nthilg0pal/senthil-api:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
               name: http
