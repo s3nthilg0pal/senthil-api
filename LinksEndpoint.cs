@@ -36,7 +36,10 @@ public sealed record LinkResponse(
     string ContentType,
     DateTime Date);
 
-public sealed class UpsertLinkEndpoint(AppDbContext db, AIAgent agent) : Endpoint<LinkRequest, LinkResponse>
+public sealed class UpsertLinkEndpoint(
+    AppDbContext db,
+    AIAgent agent,
+    ILogger<UpsertLinkEndpoint> logger) : Endpoint<LinkRequest, LinkResponse>
 {
     private sealed record LlmLinkInput(
         string Url,
@@ -182,10 +185,14 @@ public sealed class UpsertLinkEndpoint(AppDbContext db, AIAgent agent) : Endpoin
                 }
             }
         }
-        catch
+        catch (Exception ex)
         {
             llmCallFailed = true;
-            // Fall back to local metadata extraction below.
+            logger.LogError(
+                ex,
+                "LLM link classification failed for {Source} URL {Url}. Falling back to local metadata.",
+                source,
+                req.Url);
         }
         finally
         {
