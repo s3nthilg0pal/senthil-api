@@ -32,7 +32,7 @@ public sealed class ApiKeyAuthenticationHandler : AuthenticationHandler<Authenti
         if (!Request.Headers.TryGetValue(HeaderName, out var providedApiKey)
             || string.IsNullOrWhiteSpace(providedApiKey))
         {
-            return Task.FromResult(AuthenticateResult.Fail("Missing API key."));
+            return Task.FromResult(AuthenticateResult.NoResult());
         }
 
         if (!string.Equals(providedApiKey, configuredApiKey, StringComparison.Ordinal))
