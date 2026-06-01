@@ -25,11 +25,28 @@ public static class AgentMetrics
             unit: "{fallback}",
             description: "Total number of times fallback metadata logic was used.");
 
+    private static readonly Counter<long> AgentSuccessCounter =
+        Meter.CreateCounter<long>(
+            name: "senthilapi_agent_success_total",
+            unit: "{success}",
+            description: "Total number of complete successful agent classifications.");
+
+    private static readonly Counter<long> AgentCategoryCounter =
+        Meter.CreateCounter<long>(
+            name: "senthilapi_agent_category_total",
+            unit: "{classification}",
+            description: "Total number of content type categories returned by the LLM or fallback classifier.");
+
     private static readonly Counter<long> AgentResultTypeCounter =
         Meter.CreateCounter<long>(
             name: "senthilapi_agent_result_content_type_total",
             unit: "{result}",
             description: "Total number of final content type classifications produced.");
+
+    private static string NormalizeContentType(string contentType)
+    {
+        return contentType.Trim().ToLowerInvariant();
+    }
 
     public static void RecordRun(
         string source,
@@ -57,6 +74,31 @@ public static class AgentMetrics
             });
     }
 
+    public static void RecordSuccess(string source)
+    {
+        AgentSuccessCounter.Add(
+            1,
+            new TagList
+            {
+                { "source", source }
+            });
+    }
+
+    public static void RecordCategory(
+        string source,
+        string classificationSource,
+        string contentType)
+    {
+        AgentCategoryCounter.Add(
+            1,
+            new TagList
+            {
+                { "source", source },
+                { "classification_source", classificationSource },
+                { "content_type", NormalizeContentType(contentType) }
+            });
+    }
+
     public static void RecordResultType(string source, string contentType)
     {
         AgentResultTypeCounter.Add(
@@ -64,7 +106,7 @@ public static class AgentMetrics
             new TagList
             {
                 { "source", source },
-                { "content_type", contentType }
+                { "content_type", NormalizeContentType(contentType) }
             });
     }
 }

@@ -177,6 +177,11 @@ public sealed class UpsertLinkEndpoint(
                 if (json.RootElement.TryGetProperty("contentType", out var contentTypeElement))
                 {
                     responseType = contentTypeElement.GetString();
+
+                    if (!string.IsNullOrWhiteSpace(responseType))
+                    {
+                        AgentMetrics.RecordCategory(source, "llm", responseType);
+                    }
                 }
 
                 if (json.RootElement.TryGetProperty("title", out var titleElement))
@@ -208,6 +213,7 @@ public sealed class UpsertLinkEndpoint(
             if (string.IsNullOrWhiteSpace(responseType))
             {
                 responseType = fallback.ContentType;
+                AgentMetrics.RecordCategory(source, "fallback", fallback.ContentType);
             }
 
             if (string.IsNullOrWhiteSpace(responseTitle))
@@ -221,6 +227,11 @@ public sealed class UpsertLinkEndpoint(
             : (usedFallback ? "partial" : "success");
 
         AgentMetrics.RecordRun(source, runOutcome, llmAttempt.Elapsed.TotalMilliseconds);
+
+        if (runOutcome == "success")
+        {
+            AgentMetrics.RecordSuccess(source);
+        }
 
         if (usedFallback)
         {
