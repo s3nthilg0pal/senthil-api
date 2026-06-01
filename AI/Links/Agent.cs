@@ -14,6 +14,8 @@ Input is only a URL string.
 Categories:
 video, blog, product, repo, docs, link
 
+Return contentType as one of those exact lowercase values.
+
 Definitions:
 video = watchable video or video platform page like youtube
 blog = article, essay, tutorial, news, blog post

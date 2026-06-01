@@ -1,12 +1,18 @@
 using System.Text.Json;
 using System.Diagnostics;
+using System.Text.Json.Serialization;
 using FastEndpoints;
 using Microsoft.Agents.AI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
 
-public sealed class LinksEndpoint(AppDbContext db) : EndpointWithoutRequest<IReadOnlyList<LinkResponse>>
+public sealed class LinksEndpoint(AppDbContext db) : EndpointWithoutRequest<LinksResponse>
 {
+    private static string NormalizeContentType(string contentType)
+    {
+        return contentType.Trim().ToLowerInvariant();
+    }
+
     public override void Configure()
     {
         Get("/links");
@@ -22,19 +28,23 @@ public sealed class LinksEndpoint(AppDbContext db) : EndpointWithoutRequest<IRea
             .Select(link => new LinkResponse(
                 link.Title,
                 link.Url,
-                link.ContentType,
-                link.Date))
+                NormalizeContentType(link.ContentType),
+                DateOnly.FromDateTime(link.Date)))
             .ToListAsync(ct);
 
-        await Send.OkAsync(links, ct);
+        await Send.OkAsync(new LinksResponse(links), ct);
     }
 }
+
+public sealed record LinksResponse(
+    IReadOnlyList<LinkResponse> Links);
 
 public sealed record LinkResponse(
     string Title,
     string Url,
+    [property: JsonPropertyName("content_type")]
     string ContentType,
-    DateTime Date);
+    DateOnly Date);
 
 public sealed class UpsertLinkEndpoint(
     AppDbContext db,
@@ -42,6 +52,11 @@ public sealed class UpsertLinkEndpoint(
     ILogger<UpsertLinkEndpoint> logger,
     ILinkCreatedDeploymentQueue deploymentQueue) : Endpoint<LinkRequest, LinkResponse>
 {
+    private static string NormalizeContentType(string contentType)
+    {
+        return contentType.Trim().ToLowerInvariant();
+    }
+
     private sealed record LlmLinkInput(
         string Url,
         string? Title,
@@ -127,12 +142,12 @@ public sealed class UpsertLinkEndpoint(
     "contentType": {
       "type": "string",
       "enum": [
-        "Video",
-        "Blog",
-        "Product",
-        "Repo",
-        "Docs",
-        "Link"
+        "video",
+        "blog",
+        "product",
+        "repo",
+        "docs",
+        "link"
       ]
     },
     "title": {
@@ -243,10 +258,10 @@ public sealed class UpsertLinkEndpoint(
             AgentMetrics.RecordFallback(source, fallbackReason);
         }
 
-        var finalType = responseType ?? contentType;
+        var finalType = NormalizeContentType(responseType ?? contentType);
         var finalTitle = responseTitle ?? req.Title;
 
-        AgentMetrics.RecordResultType(source, finalType.ToLowerInvariant());
+        AgentMetrics.RecordResultType(source, finalType);
 
 
         var isNewLink = link is null;
@@ -289,7 +304,7 @@ public sealed class UpsertLinkEndpoint(
             link.Title,
             link.Url,
             link.ContentType,
-            link.Date), ct);
+            DateOnly.FromDateTime(link.Date)), ct);
     }
 }
 
@@ -303,10 +318,10 @@ public sealed record LinkInfo(string url, ContentCategory contentType, string ti
 
 public enum ContentCategory
 {
-    Video,
-    Blog,
-    Product,
-    Repo,
-    Docs,
-    Link
+    video,
+    blog,
+    product,
+    repo,
+    docs,
+    link
 }
