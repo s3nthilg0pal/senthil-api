@@ -55,6 +55,15 @@ public partial class Program
         bld.Services.AddAuthorization();
         bld.Services.AddSingleton<AIAgent>(sp =>
             Agent.CreateAgent(sp.GetRequiredService<IConfiguration>()));
+        bld.Services.Configure<DeployWebhookOptions>(
+            bld.Configuration.GetSection("DeployWebhook"));
+        bld.Services.AddSingleton<ILinkCreatedDeploymentQueue, LinkCreatedDeploymentQueue>();
+        bld.Services.AddHttpClient<DeployWebhookDispatcher>(client =>
+        {
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("SenthilApi");
+            client.Timeout = TimeSpan.FromSeconds(10);
+        });
+        bld.Services.AddHostedService<LinkCreatedDeploymentWorker>();
 
         var app = bld.Build();
 

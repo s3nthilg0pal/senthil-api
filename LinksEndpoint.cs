@@ -39,7 +39,8 @@ public sealed record LinkResponse(
 public sealed class UpsertLinkEndpoint(
     AppDbContext db,
     AIAgent agent,
-    ILogger<UpsertLinkEndpoint> logger) : Endpoint<LinkRequest, LinkResponse>
+    ILogger<UpsertLinkEndpoint> logger,
+    ILinkCreatedDeploymentQueue deploymentQueue) : Endpoint<LinkRequest, LinkResponse>
 {
     private sealed record LlmLinkInput(
         string Url,
@@ -248,7 +249,9 @@ public sealed class UpsertLinkEndpoint(
         AgentMetrics.RecordResultType(source, finalType.ToLowerInvariant());
 
 
-        if (link is null)
+        var isNewLink = link is null;
+
+        if (isNewLink)
         {
             link = new Link
             {
@@ -263,12 +266,24 @@ public sealed class UpsertLinkEndpoint(
         }
         else
         {
+            ArgumentNullException.ThrowIfNull(link);
+
             link.Title = finalTitle;
             link.ContentType = finalType;
             link.Date = createdAt;
         }
 
         await db.SaveChangesAsync(ct);
+
+        if (isNewLink)
+        {
+            await deploymentQueue.EnqueueAsync(new LinkCreatedDeploymentRequest(
+                link.Id,
+                link.Title,
+                link.Url,
+                link.ContentType,
+                link.Date), ct);
+        }
 
         await Send.OkAsync(new LinkResponse(
             link.Title,

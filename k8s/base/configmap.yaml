@@ -7,3 +7,6 @@ data:
   ASPNETCORE_ENVIRONMENT: Production
   ASPNETCORE_URLS: http://+:8080
   AI__Ollama__ModelId: qwen3.5:2b
+  DeployWebhook__Enabled: "true"
+  DeployWebhook__Url: https://api.github.com/repos/s3nthilg0pal/i-wish-i-knew-that/dispatches
+  DeployWebhook__EventType: link-added

@@ -6,7 +6,23 @@ on:
       - main
     paths-ignore:
       - k8s/overlays/prod/kustomization.yaml
+  repository_dispatch:
+    types:
+      - link-added
   workflow_dispatch:
+    inputs:
+      link_id:
+        description: Link row id that triggered this deployment
+        required: false
+      link_url:
+        description: Link URL that triggered this deployment
+        required: false
+      link_title:
+        description: Link title that triggered this deployment
+        required: false
+      content_type:
+        description: Link content type that triggered this deployment
+        required: false
 
 permissions:
   contents: write
