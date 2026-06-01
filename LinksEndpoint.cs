@@ -265,7 +265,7 @@ public sealed class UpsertLinkEndpoint(
         {
             link.Title = finalTitle;
             link.ContentType = finalType;
-            link.Date = req.Date;
+            link.Date = createdAt;
         }
 
         await db.SaveChangesAsync(ct);
