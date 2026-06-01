@@ -61,7 +61,7 @@ public sealed class UpsertLinkEndpoint(
         string Url,
         string? Title,
         string? Description,
-        string? PageType);
+        string? OgType);
 
     private static bool IsYouTubeUrl(string url)
     {
@@ -106,12 +106,19 @@ public sealed class UpsertLinkEndpoint(
 
     private static (string? Title, string ContentType) GetFallbackMetadata(LlmLinkInput metadata)
     {
-        var isVideo = IsYouTubeUrl(metadata.Url)
-            || string.Equals(metadata.PageType, "video", StringComparison.OrdinalIgnoreCase);
+        var ogType = metadata.OgType?.Trim().ToLowerInvariant();
 
-        return isVideo
-            ? (metadata.Title, "video")
-            : (metadata.Title, "link");
+        var contentType = ogType switch
+        {
+            "video" or "video.movie" or "video.episode" or "video.tv_show" or "video.other" => "video",
+            "article" or "profile" or "book" => "blog",
+            "product" => "product",
+            _ when IsYouTubeUrl(metadata.Url) => "video",
+            _ when metadata.Url.Contains("github.com/", StringComparison.OrdinalIgnoreCase) => "repo",
+            _ => "link"
+        };
+
+        return (metadata.Title, contentType);
     }
 
     public override void Configure()

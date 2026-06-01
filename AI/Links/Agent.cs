@@ -29,8 +29,8 @@ For YouTube URLs:
 - set contentType to video
 
 For non-YouTube URLs:
-- call GetWebsiteMetadata tool first to fetch title, description, and pageType
-- use description and pageType as primary signals
+- call GetWebsiteMetadata tool first to fetch title, description, and ogType
+- use ogType and description as primary signals
 - use url as a secondary signal
 
 Choose the best category. If uncertain, choose link.
@@ -80,7 +80,7 @@ If title is not found, return null.
         return title;
     }
 
-    [Description("Get website metadata as JSON with title, description, and pageType")]
+    [Description("Get website metadata as JSON with title, description, and ogType")]
     public static async Task<string> GetWebsiteMetadata([Description("The website url")] string url)
     {
         var metadata = await WebPageMetadata.GetMetadataAsync(url);
@@ -89,7 +89,7 @@ If title is not found, return null.
         {
             title = metadata.Title,
             description = metadata.Description,
-            pageType = metadata.Type
+            ogType = metadata.Type
         });
     }
 }
